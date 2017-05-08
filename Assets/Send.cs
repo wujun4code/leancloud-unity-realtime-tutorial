@@ -31,7 +31,7 @@ public class Send : MonoBehaviour
                 return Task.FromResult<AVIMClient>(MyWebSocketClient.ClientInstance);
             }
 
-            return AVRealtime.Instance.CreateClient(clientId);
+            return AVRealtime.Instance.CreateClient(clientId: clientId, secure: true);
         };
 
         return getClient().ContinueWith(t =>
