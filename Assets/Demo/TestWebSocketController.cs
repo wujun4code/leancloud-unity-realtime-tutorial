@@ -44,7 +44,7 @@ public class TestWebSocketController : MonoBehaviour, WebSocketUnityDelegate {
 				//		for example : https://github.com/willryan/em-websocket
 				// Warning : some libraries (for example on ios) don't support reconnection
 				//         so you need to create a new websocketunity before each connect (destroy your object when receive a disconnect or an error)
-				webSocket = new WebSocketUnity("ws://echo.websocket.org", this); // <= public server
+				webSocket = new WebSocketUnity("wss://rtm55.leancloud.cn", this); // <= public server
 				//webSocket = new WebSocketUnity("ws://localhost:8080", this); // <= local server
 				
 				// Second Step : we open the connection

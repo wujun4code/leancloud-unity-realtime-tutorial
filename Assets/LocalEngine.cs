@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using LeanCloud;
 using System.Threading.Tasks;
+using LeanCloud.Realtime;
 
 public class LocalEngine : MonoBehaviour
 {
@@ -19,11 +20,8 @@ public class LocalEngine : MonoBehaviour
 
     }
 
-    public void TestLocalEngineRequest()
+    public void OpenWss()
     {
-        AVCloud.CallFunctionAsync<string>("hello", null).ContinueWith(engineResponse =>
-        {
-            Debug.Log("local engine response" + engineResponse.Result);
-        });
+        AVRealtime.Instance.OpenAsync("wss://rtm55.leancloud.cn/");
     }
 }

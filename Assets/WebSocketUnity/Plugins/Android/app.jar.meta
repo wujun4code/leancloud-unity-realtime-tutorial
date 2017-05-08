@@ -1,6 +1,6 @@
 fileFormatVersion: 2
-guid: 5529fde0c642e47d585f14d8a0448953
-timeCreated: 1494225984
+guid: a1da3d9170e2c4dd7935519b6c0d5eb6
+timeCreated: 1494228832
 licenseType: Free
 PluginImporter:
   serializedVersion: 2
@@ -11,9 +11,15 @@ PluginImporter:
   platformData:
     data:
       first:
-        Any: 
+        Android: Android
       second:
         enabled: 1
+        settings: {}
+    data:
+      first:
+        Any: 
+      second:
+        enabled: 0
         settings: {}
     data:
       first:
@@ -22,13 +28,6 @@ PluginImporter:
         enabled: 0
         settings:
           DefaultValueInitialized: true
-    data:
-      first:
-        Windows Store Apps: WindowsStoreApps
-      second:
-        enabled: 0
-        settings:
-          CPU: AnyCPU
   userData: 
   assetBundleName: 
   assetBundleVariant: 
