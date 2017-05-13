@@ -21,9 +21,16 @@ public class Init : MonoBehaviour
 
         AVRealtime.WebSocketLog(UnityEngine.Debug.Log);
 
+
         RealtimeInstance = new AVRealtime(config);
+
+
         RealtimeInstance.RegisterMessageType<Emoji>();
         RealtimeInstance.RegisterMessageType<NikkiMessage>();
+        RealtimeInstance.RegisterMessageType<BinaryMessage>();
+        RealtimeInstance.RegisterMessageType<IMNormalTalk>();
+
+        AVRealtime.Instance.ToggleHeartBeating(interval: 2000);
     }
 
     // Update is called once per frame
