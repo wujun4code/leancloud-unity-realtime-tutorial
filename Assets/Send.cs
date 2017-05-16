@@ -22,26 +22,49 @@ public class Send : MonoBehaviour
 
     }
 
-    Task<AVIMConversation> GetTestConversation(string clientId, string convId)
+    public Task<AVIMClient> GetClient(string clientId)
     {
-        Func<Task<AVIMClient>> getClient = () =>
+        if (MyWebSocketClient.ClientInstance != null)
         {
-            if (MyWebSocketClient.ClientInstance != null)
+            return Task.FromResult<AVIMClient>(MyWebSocketClient.ClientInstance);
+        }
+
+        return AVRealtime.Instance.CreateClientAsync(clientId: clientId, secure: true).ContinueWith(s =>
+        {
+            if (s.IsFaulted)
             {
-                return Task.FromResult<AVIMClient>(MyWebSocketClient.ClientInstance);
+                Debug.Log("IsFaulted");
+            }
+            if (s.Exception != null)
+            {
+                var inner = s.Exception.InnerException;
+                var inners = s.Exception.InnerExceptions;
+                if (inner != null)
+                {
+                    Debug.Log("inner");
+                    Debug.Log(inner.Message);
+                }
+
+                if (inners != null)
+                {
+                    Debug.Log("inners");
+                    foreach (var e in inners)
+                    {
+                        Debug.Log(e.Message);
+                    }
+                }
             }
 
-            AVRealtime.Instance.CreateClient(clientId: clientId,deviceId:"Iphpne 6s-xaajdkj",tag:"unity-ios");
-            return AVRealtime.Instance.CreateClient(clientId: clientId, secure: true).ContinueWith(s =>
-            {
-                var client = s.Result;
-                client.OnMessageReceived += OnMessageReceived;
+            var client = s.Result;
+            client.OnMessageReceived += OnMessageReceived;
 
-                return client;
-            });
-        };
+            return client;
+        });
+    }
 
-        return getClient().ContinueWith(t =>
+    public Task<AVIMConversation> GetTestConversation(string clientId, string convId)
+    {
+        return GetClient(clientId).ContinueWith(t =>
         {
             MyWebSocketClient.ClientInstance = t.Result;
             var conversation = AVIMConversation.CreateWithoutData(convId, MyWebSocketClient.ClientInstance);
@@ -77,6 +100,10 @@ public class Send : MonoBehaviour
                 return conversation.SendMessageAsync(textMessage);
             }).Unwrap().ContinueWith(s =>
             {
+                if (s.IsFaulted)
+                {
+                    Debug.Log("IsFaulted");
+                }
                 if (s.Exception != null)
                 {
                     var inner = s.Exception.InnerException;
@@ -96,7 +123,6 @@ public class Send : MonoBehaviour
                         }
                     }
                 }
-                Debug.Log(s.Result.Id);
             });
         }
         catch (Exception ex)
@@ -149,8 +175,17 @@ public class Send : MonoBehaviour
         this.GetTestConversation("junwu", "58be1f5392509726c3dc1c8b").ContinueWith(t =>
         {
             var conversation = t.Result;
-            var testMessage = new IMNormalTalk("junwu","I love Unity");
+            var testMessage = new IMNormalTalk("junwu", "I love Unity");
             return conversation.SendMessageAsync(testMessage);
+        });
+    }
+
+    public void LogOut()
+    {
+        this.GetClient("junwu").ContinueWith(t =>
+        {
+            var client = t.Result;
+            client.CloseAsync();
         });
     }
 
