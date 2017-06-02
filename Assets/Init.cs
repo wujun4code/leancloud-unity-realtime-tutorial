@@ -4,25 +4,28 @@ using UnityEngine;
 using LeanCloud;
 using System.Threading.Tasks;
 using LeanCloud.Realtime;
+using LeanCloud.Push.Internal;
+#if UNITY_IPHONE && !UNITY_EDITOR
+using UnityEngine.iOS;
+#endif
 
 public class Init : MonoBehaviour
 {
     public static AVRealtime RealtimeInstance { get; set; }
+    bool tokenSent;
+    public AVInstallation currentInstallation = null;
     // Use this for initialization
     void Start()
     {
         var sc = GameObject.FindObjectOfType<MyWebSocketClient>();
         var config = new AVRealtime.Configuration()
         {
-            ApplicationId = "uay57kigwe0b6f5n0e1d4z4xhydsml3dor24bzwvzr57wdap",
-            ApplicationKey = "kfgz7jjfsk55r5a8a3y4ttd3je1ko11bkibcikonk32oozww",
+            ApplicationId = "3knLr8wGGKUBiXpVAwDnryNT-gzGzoHsz",
+            ApplicationKey = "3RpBhjoPXJjVWvPnVmPyFExt",
             WebSocketClient = sc // 使用已经初始化的 WebSocketClient 实例作为 AVRealtime 初始化的配置参数
         };
 
         AVRealtime.WebSocketLog(UnityEngine.Debug.Log);
-
-
-
         RealtimeInstance = new AVRealtime(config);
 
         AVRealtime.Instance.UseLeanEngineSignatureFactory();
@@ -37,7 +40,6 @@ public class Init : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
     }
 
     public void TestLocalEngineRequest()

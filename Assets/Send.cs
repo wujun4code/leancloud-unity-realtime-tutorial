@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using LeanCloud.Core;
 using LeanCloud;
+using LeanCloud.Storage.Internal;
+
 public class Send : MonoBehaviour
 {
 
@@ -26,40 +28,45 @@ public class Send : MonoBehaviour
     {
         if (MyWebSocketClient.ClientInstance != null)
         {
+            Debug.Log("client already created.");
             return Task.FromResult<AVIMClient>(MyWebSocketClient.ClientInstance);
         }
-
-        return AVRealtime.Instance.CreateClientAsync(clientId: clientId, secure: true).ContinueWith(s =>
+        else
         {
-            if (s.IsFaulted)
-            {
-                Debug.Log("IsFaulted");
-            }
-            if (s.Exception != null)
-            {
-                var inner = s.Exception.InnerException;
-                var inners = s.Exception.InnerExceptions;
-                if (inner != null)
-                {
-                    Debug.Log("inner");
-                    Debug.Log(inner.Message);
-                }
+            return AVRealtime.Instance.CreateClientAsync(clientId: clientId, secure: true).ContinueWith(s =>
+                   {
+                       if (s.IsFaulted)
+                       {
+                           Debug.Log("IsFaulted");
+                       }
+                       if (s.Exception != null)
+                       {
+                           var inner = s.Exception.InnerException;
+                           var inners = s.Exception.InnerExceptions;
+                           if (inner != null)
+                           {
+                               Debug.Log("inner");
+                               Debug.Log(inner.Message);
+                           }
 
-                if (inners != null)
-                {
-                    Debug.Log("inners");
-                    foreach (var e in inners)
-                    {
-                        Debug.Log(e.Message);
-                    }
-                }
-            }
+                           if (inners != null)
+                           {
+                               Debug.Log("inners");
+                               foreach (var e in inners)
+                               {
+                                   Debug.Log(e.Message);
+                               }
+                           }
+                       }
 
-            var client = s.Result;
-            client.OnMessageReceived += OnMessageReceived;
+                       var client = s.Result;
+                       MyWebSocketClient.ClientInstance = client;
+                       MyWebSocketClient.ClientInstance.OnMessageReceived += OnMessageReceived;
 
-            return client;
-        });
+                       return client;
+                   });
+        }
+
     }
 
     public Task<AVIMConversation> GetTestConversation(string clientId, string convId)
@@ -71,8 +78,40 @@ public class Send : MonoBehaviour
             return conversation;
         });
     }
+    AVIMConversation chatRoom;
+    public Task<AVIMConversation> GetChatRoom(string clientId, string chatRoomId)
+    {
+        return this.GetClient(clientId).OnSuccess(t =>
+        {
+            if (chatRoom != null)
+            {
+                Debug.Log("chatRoom already created.");
+                return Task.FromResult(chatRoom);
+            }
+            return t.Result.GetConversationAsync(chatRoomId, true);
+        }).Unwrap().OnSuccess(x =>
+        {
+            chatRoom = x.Result;
+            return chatRoom;
+        });
+    }
+
+    public void SendToChatRoom()
+    {
+        var textMessage = new AVIMTextMessage("兄弟们，睡什么睡，起来嗨！");
+
+        this.GetChatRoom("junwu", "5930ea19fab00f41ddc7f42b").OnSuccess(t =>
+         {
+             return MyWebSocketClient.ClientInstance.SendMessageAsync(t.Result, textMessage);
+         }).Unwrap().OnSuccess(x =>
+         {
+             Debug.Log("chat room sent");
+         });
+    }
+
     private void OnMessageReceived(object sender, AVIMMessageEventArgs e)
     {
+        Debug.Log("OnMessageReceived" + e.Message.ToString() + e.Message.GetType());
         if (e.Message is BinaryMessage)
         {
             var binaryMessage = e.Message as BinaryMessage;
@@ -86,13 +125,23 @@ public class Send : MonoBehaviour
             var imNormalTalkMessage = e.Message as IMNormalTalk;
             Debug.Log("IMNormalTalk message:" + imNormalTalkMessage.m_Content);
         }
+        else if (e.Message is AVIMTextMessage)
+        {
+            var textMessage = e.Message as AVIMTextMessage;
+            Debug.Log("text message:" + textMessage.Content);
+        }
+        else if (e.Message is Emoji)
+        {
+            var emoji = e.Message as Emoji;
+            Debug.Log("Emoji message:" + emoji.Ecode);
+        }
     }
 
     public void TestSendTextMessage()
     {
         try
         {
-            this.GetTestConversation("junwu", "58be1f5392509726c3dc1c8b").ContinueWith(t =>
+            this.GetTestConversation("junwu", "5930ea19fab00f41ddc7f42b").ContinueWith(t =>
             {
                 var conversation = t.Result;
                 Debug.Log(conversation.Name);
@@ -133,7 +182,7 @@ public class Send : MonoBehaviour
 
     public void TestSendEmojiMessage()
     {
-        this.GetTestConversation("junwu", "58be1f5392509726c3dc1c8b").ContinueWith(t =>
+        this.GetTestConversation("junwu", "5930ea19fab00f41ddc7f42b").ContinueWith(t =>
         {
             var conversation = t.Result;
             var emojiMessage = new Emoji()
@@ -146,7 +195,7 @@ public class Send : MonoBehaviour
 
     public void TestSendNikkiMessage()
     {
-        this.GetTestConversation("junwu", "58be1f5392509726c3dc1c8b").ContinueWith(t =>
+        this.GetTestConversation("junwu", "5930ea19fab00f41ddc7f42b").ContinueWith(t =>
         {
             var conversation = t.Result;
             var nikki = new NikkiMessage()
@@ -160,7 +209,7 @@ public class Send : MonoBehaviour
 
     public void TestSendBinaryMessage()
     {
-        this.GetTestConversation("junwu", "58be1f5392509726c3dc1c8b").ContinueWith(t =>
+        this.GetTestConversation("junwu", "5930ea19fab00f41ddc7f42b").ContinueWith(t =>
         {
             var conversation = t.Result;
             var text = "I love Unity";
@@ -172,7 +221,7 @@ public class Send : MonoBehaviour
 
     public void TestSendIMNormalTalkMessage()
     {
-        this.GetTestConversation("junwu", "58be1f5392509726c3dc1c8b").ContinueWith(t =>
+        this.GetTestConversation("junwu", "58341551fab00f41dd85da12").ContinueWith(t =>
         {
             var conversation = t.Result;
             var testMessage = new IMNormalTalk("junwu", "I love Unity");
