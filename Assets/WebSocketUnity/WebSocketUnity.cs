@@ -16,15 +16,23 @@ public interface IWebSocketUnityPlatform
     bool IsOpened();
     void Send(string message);
     void Send(byte[] data);
+
+    string Url { get; set; }
 }
 
 public class WebSocketUnity
 {
 
     // URL used for the connection
-    private string mUrl;
+    public string mUrl { get; set; }
     // Websocket implementation
     private IWebSocketUnityPlatform mPlatformWebSocket;
+
+    public WebSocketUnity(MonoBehaviour eventHandler)
+       : this("", eventHandler)
+    {
+
+    }
 
     // Constructor
     // param : url of your server (for example : ws://echo.websocket.org)
@@ -55,7 +63,15 @@ public class WebSocketUnity
     // Open a connection with the specified url
     public void Open()
     {
+#if UNITY_ANDROID && !UNITY_EDITOR
+        mPlatformWebSocket.Url = this.mUrl;
+#endif
         mPlatformWebSocket.Open();
+    }
+
+    public void Open(string wss)
+    {
+
     }
 
     // Close the opened connection

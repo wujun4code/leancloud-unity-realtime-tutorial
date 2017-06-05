@@ -29,6 +29,8 @@ public class WebSocketUnityiOS : IWebSocketUnityPlatform{
 	[DllImport ("__Internal")]
 	private static extern bool _IsOpened();
 
+	public string Url { get; set; }
+
 	// Constructor
 	// param : url of your server (for example : ws://echo.websocket.org)
 	// param : gameObjectName name of the game object who will receive events

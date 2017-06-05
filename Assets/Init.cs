@@ -5,9 +5,7 @@ using LeanCloud;
 using System.Threading.Tasks;
 using LeanCloud.Realtime;
 using LeanCloud.Push.Internal;
-#if UNITY_IPHONE && !UNITY_EDITOR
-using UnityEngine.iOS;
-#endif
+using LeanCloud.Storage.Internal;
 
 public class Init : MonoBehaviour
 {
@@ -17,36 +15,35 @@ public class Init : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        var sc = GameObject.FindObjectOfType<MyWebSocketClient>();
+        var websocketPlugin = GameObject.FindObjectOfType<UnityWebSocketClient>();
         var config = new AVRealtime.Configuration()
         {
             ApplicationId = "3knLr8wGGKUBiXpVAwDnryNT-gzGzoHsz",
             ApplicationKey = "3RpBhjoPXJjVWvPnVmPyFExt",
-            WebSocketClient = sc // 使用已经初始化的 WebSocketClient 实例作为 AVRealtime 初始化的配置参数
+            WebSocketClient = websocketPlugin // 使用已经初始化的 WebSocketClient 实例作为 AVRealtime 初始化的配置参数
         };
 
         AVRealtime.WebSocketLog(UnityEngine.Debug.Log);
-        RealtimeInstance = new AVRealtime(config);
 
-        AVRealtime.Instance.UseLeanEngineSignatureFactory();
-        RealtimeInstance.RegisterMessageType<Emoji>();
-        RealtimeInstance.RegisterMessageType<NikkiMessage>();
-        RealtimeInstance.RegisterMessageType<BinaryMessage>();
-        RealtimeInstance.RegisterMessageType<IMNormalTalk>();
+        RealtimeSingleton.Init(new AVRealtime(config));
+        RealtimeSingleton.Current.UseLeanEngineSignatureFactory();
 
-        //AVRealtime.Instance.ToggleHeartBeating(false);
+        RealtimeSingleton.Current.CreateClientAsync("junwu").OnSuccess(t =>
+        {
+            ClientSingleton.Init(t.Result);
+
+            return ClientSingleton.Current.GetQuery().FirstAsync();
+        }).Unwrap().OnSuccess(s =>
+        {
+            ConversationSingleton.Current = s.Result;
+            if (ConversationSingleton.Current != null)
+                AVRealtime.PrintLog("current conversation id is: " + ConversationSingleton.Current.ConversationId);
+        });
+
     }
 
     // Update is called once per frame
     void Update()
     {
-    }
-
-    public void TestLocalEngineRequest()
-    {
-        AVCloud.CallFunctionAsync<string>("hello", null).ContinueWith(engineResponse =>
-        {
-            Debug.Log("local engine response" + engineResponse.Result);
-        });
     }
 }
