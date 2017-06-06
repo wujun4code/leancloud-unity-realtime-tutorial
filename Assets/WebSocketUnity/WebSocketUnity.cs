@@ -18,13 +18,16 @@ public interface IWebSocketUnityPlatform
     void Send(byte[] data);
 
     string Url { get; set; }
+
+    string GameObjectName { get; set; }
 }
 
 public class WebSocketUnity
 {
-
     // URL used for the connection
     public string mUrl { get; set; }
+    public string mGameObjectName { get; set; }
+
     // Websocket implementation
     private IWebSocketUnityPlatform mPlatformWebSocket;
 
@@ -45,6 +48,7 @@ public class WebSocketUnity
             Debug.LogError("WebSocketUnity : your GameObject " + eventHandler.name + " has to extend WebSocketUnityDelegate !");
             return;
         }
+
         mUrl = url;
 #if UNITY_IPHONE && !UNITY_EDITOR
 		mPlatformWebSocket = new WebSocketUnityiOS(mUrl, eventHandler.gameObject.name);
@@ -65,8 +69,10 @@ public class WebSocketUnity
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
         mPlatformWebSocket.Url = this.mUrl;
+        mPlatformWebSocket.GameObjectName = this.mGameObjectName;
 #endif
         mPlatformWebSocket.Open();
+
     }
 
     public void Open(string wss)

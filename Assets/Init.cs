@@ -11,6 +11,7 @@ public class Init : MonoBehaviour
 {
     public static AVRealtime RealtimeInstance { get; set; }
     bool tokenSent;
+    
     public AVInstallation currentInstallation = null;
     // Use this for initialization
     void Start()

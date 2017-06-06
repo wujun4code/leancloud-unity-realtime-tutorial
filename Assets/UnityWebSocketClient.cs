@@ -11,13 +11,19 @@ public class UnityWebSocketClient : MonoBehaviour, WebSocketUnityDelegate, IWebS
 {
     void Awake()
     {
-#if UNITY_ANDROID && !UNITY_EDITOR
-         webSocket = new WebSocketUnity(this);
-#endif
+        Debug.Log("Awake.gameObject.name:" + this.gameObject.name);
     }
     void Start()
     {
-
+        Debug.Log("Start.gameObject.name:" + this.gameObject.name);
+#if UNITY_ANDROID && !UNITY_EDITOR
+        webSocket = new WebSocketUnity(this);
+#endif
+    }
+    string mGameObjectName = "";
+    void Update()
+    {
+        mGameObjectName = this.gameObject.name;
     }
     // Web Socket for Unity
     //    Desktop
@@ -98,10 +104,12 @@ public class UnityWebSocketClient : MonoBehaviour, WebSocketUnityDelegate, IWebS
     {
 #if UNITY_ANDROID && !UNITY_EDITOR
         webSocket.mUrl = url;
+        webSocket.mGameObjectName = this.mGameObjectName;
 #else
         webSocket = new WebSocketUnity(url, this);
 #endif
         webSocket.Open();
+
     }
 
     public void Send(string message)

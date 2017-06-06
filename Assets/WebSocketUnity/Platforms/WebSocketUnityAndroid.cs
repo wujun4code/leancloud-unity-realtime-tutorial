@@ -13,6 +13,7 @@ public class WebSocketUnityAndroid : IWebSocketUnityPlatform
 
     private AndroidJavaObject mWebSocket = null;
     public string Url { get; set; }
+    public string GameObjectName { get; set; }
 
     // Constructor
     // param : url of your server (for example : ws://echo.websocket.org)
@@ -20,18 +21,9 @@ public class WebSocketUnityAndroid : IWebSocketUnityPlatform
     public WebSocketUnityAndroid(string url, string gameObjectName)
     {
         Url = url;
-        if (0 == AndroidJNI.AttachCurrentThread())
-        {
-            Debug.LogError("AttachCurrentThread success");
-            object[] parameters = new object[1];
-            parameters[0] = gameObjectName;
-
-            mWebSocket = new AndroidJavaObject("com.jonathanpavlou.WebSocketUnityImpl", parameters);
-        }
-        else
-        {
-            Debug.LogError("AttachCurrentThread faliue");
-        }
+        object[] parameters = new object[1];
+        parameters[0] = gameObjectName;
+        mWebSocket = new AndroidJavaObject("com.jonathanpavlou.WebSocketUnityImpl", parameters);
     }
 
     #region Basic features
@@ -39,9 +31,12 @@ public class WebSocketUnityAndroid : IWebSocketUnityPlatform
     // Open a connection with the specified url
     public void Open()
     {
+        AndroidJNI.AttachCurrentThread();
         mWebSocket.Call("initialize", new object[1] { Url });
+        mWebSocket.Call("setHandlerGameObjectName", new object[1] { GameObjectName });
         Debug.LogError("Open");
         mWebSocket.Call("connect");
+        AndroidJNI.DetachCurrentThread();
     }
 
     // Close the opened connection
@@ -54,20 +49,21 @@ public class WebSocketUnityAndroid : IWebSocketUnityPlatform
     // Check if the connection is opened
     public bool IsOpened()
     {
+        AndroidJNI.AttachCurrentThread();
         Debug.LogError("IsOpened");
-        if (0 == AndroidJNI.AttachCurrentThread())
-        {
-            return mWebSocket.Call<bool>("isOpen");
-        }
-        return false;
+        var rtn = mWebSocket.Call<bool>("isOpen");
+        return rtn;
+
     }
 
     // Send a message through the connection
     // param : message is the sent message
     public void Send(string message)
     {
+        AndroidJNI.AttachCurrentThread();
         Debug.LogError("Send message");
         mWebSocket.Call("send", message);
+        AndroidJNI.DetachCurrentThread();
     }
 
     // Send a message through the connection
@@ -77,8 +73,6 @@ public class WebSocketUnityAndroid : IWebSocketUnityPlatform
         Debug.LogError("Send byte");
         mWebSocket.Call("send", data);
     }
-
-
     #endregion
 
 }

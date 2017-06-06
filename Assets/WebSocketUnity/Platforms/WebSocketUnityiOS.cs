@@ -31,6 +31,8 @@ public class WebSocketUnityiOS : IWebSocketUnityPlatform{
 
 	public string Url { get; set; }
 
+	public string GameObjectName { get; set; }
+
 	// Constructor
 	// param : url of your server (for example : ws://echo.websocket.org)
 	// param : gameObjectName name of the game object who will receive events

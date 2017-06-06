@@ -41,6 +41,8 @@ public class WebSocketUnityWebGL : IWebSocketUnityPlatform {
 	private int mReservedIndex = -1;
 	private static List<WebSocketUnityDelegate> sDelegateObjects = new List<WebSocketUnityDelegate>();
 	public string Url { get; set; }
+
+	public string GameObjectName { get; set; }
 	// Constructor
 	// param : url of your server (for example : ws://echo.websocket.org)
 	// param : the game object who will receive events
