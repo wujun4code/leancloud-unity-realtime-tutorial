@@ -16,9 +16,9 @@ public class UnityWebSocketClient : MonoBehaviour, WebSocketUnityDelegate, IWebS
     void Start()
     {
         Debug.Log("Start.gameObject.name:" + this.gameObject.name);
-#if UNITY_ANDROID && !UNITY_EDITOR
-        webSocket = new WebSocketUnity(this);
-#endif
+// #if UNITY_ANDROID && !UNITY_EDITOR
+//         webSocket = new WebSocketUnity(this);
+// #endif
     }
     string mGameObjectName = "";
     void Update()
@@ -56,7 +56,7 @@ public class UnityWebSocketClient : MonoBehaviour, WebSocketUnityDelegate, IWebS
     // This event happens when the websocket received a message
     public void OnWebSocketUnityReceiveMessage(string message)
     {
-        Debug.Log("Received from server : " + message);
+        // Debug.Log("Received from server : " + message);
 
         this.OnMessage(message);
     }
@@ -91,7 +91,12 @@ public class UnityWebSocketClient : MonoBehaviour, WebSocketUnityDelegate, IWebS
     {
         get
         {
-            return webSocket.IsOpened();
+            var rtn = webSocket != null;
+            if (rtn)
+                rtn = webSocket.IsOpened();
+
+            Debug.Log("IsOpen:" + rtn);
+            return rtn;
         }
     }
 
@@ -102,12 +107,13 @@ public class UnityWebSocketClient : MonoBehaviour, WebSocketUnityDelegate, IWebS
 
     public void Open(string url, string protocol = null)
     {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        webSocket.mUrl = url;
-        webSocket.mGameObjectName = this.mGameObjectName;
-#else
+// #if UNITY_ANDROID && !UNITY_EDITOR
+//         webSocket.mUrl = url;
+//         webSocket.mGameObjectName = this.mGameObjectName;
+// #else
+//         webSocket = new WebSocketUnity(url, this);
+// #endif
         webSocket = new WebSocketUnity(url, this);
-#endif
         webSocket.Open();
 
     }
